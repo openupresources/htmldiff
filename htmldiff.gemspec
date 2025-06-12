@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name             = 'sms-htmldiff'
+  s.name             = 'htmldiff'
   s.version          = '0.0.1.1'
-  s.homepage         = 'http://github.com/stackmystack/htmldiff'
-  s.summary          = 'HTML diffs of text (borrowed from a wiki software I no longer remember)'
+  s.homepage         = 'http://github.com/openupresources/htmldiff'
+  s.summary          = 'HTML diffs of text, forked from http://github.com/myobie/htmldiff'
   s.license          = 'MIT'
 
   s.authors          = ['Nathan Herald']
