@@ -1,20 +1,25 @@
-# frozen_string_literal: true
+# -*- encoding: utf-8 -*-
 
-require_relative 'lib/html_diff/version'
+Gem::Specification.new do |s|
+  s.name             = 'sms-htmldiff'
+  s.version          = '0.0.1.1'
+  s.homepage         = 'http://github.com/stackmystack/htmldiff'
+  s.summary          = 'HTML diffs of text (borrowed from a wiki software I no longer remember)'
+  s.license          = 'MIT'
 
-Gem::Specification.new do |spec|
-  spec.name = 'htmldiff'
-  spec.version = HTMLDiff::VERSION
-  spec.authors = ['Nathan Herald', 'Johnny Shields']
-  spec.email = 'nathan@myobie.com'
-  spec.summary = 'HTML diffs of text'
-  spec.description = 'Generates diffs of text in HTML format based on the LCS algorithm.'
-  spec.homepage = 'http://github.com/myobie/htmldiff'
-  spec.license = 'MIT'
+  s.authors          = ['Nathan Herald']
+  s.email            = 'nathan@myobie.com'
+  s.date             = '2008-11-21'
 
-  spec.add_dependency 'diff-lcs'
+  s.rdoc_options     = ['--main', 'README.md']
+  s.extra_rdoc_files = ['README.md', 'LICENSE']
 
-  spec.files = Dir.glob('lib/**/*') + %w[LICENSE README.md]
-  spec.require_paths = ['lib']
-  spec.metadata['rubygems_mfa_required'] = 'true'
+  s.require_paths    = ['lib']
+
+  # Manifest
+  s.files            = `git ls-files`.split("\n")
+  s.test_files       = `git ls-files -- {test,spec,features}/*`.split("\n")
+
+  # Dependencies
+  s.add_runtime_dependency('nokogiri', '>= 1.6.5')
 end
