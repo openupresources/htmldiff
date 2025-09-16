@@ -100,10 +100,12 @@ module HTMLDiff
       loop do
         break if words.empty?
 
-        if words.first.standalone_tag?
-          tag_words = words.extract_consecutive_words! do |word|
-            word.standalone_tag?
-          end
+        # Handle our-embeds and writing blank spans as single blocks
+        if words.first.closed_embed_or_blank_tag?
+          tag_words = words.extract_consecutive_words! { |word| word.closed_embed_or_blank_tag? }
+          @content << wrap_text_in_diff_tag(tag_words.join, tagname, cssclass)
+        elsif words.first.standalone_tag?
+          tag_words = words.extract_consecutive_words! { |word| word.standalone_tag? }
           @content << wrap_text_in_diff_tag(tag_words.join, tagname, cssclass)
         elsif words.first.iframe_tag?
           tag_words = words.extract_consecutive_words! { |word| word.iframe_tag? }
@@ -125,7 +127,7 @@ module HTMLDiff
             wrapped = true
           end
           @content += words.extract_consecutive_words! do |word|
-            word.tag? && !word.standalone_tag? && !word.iframe_tag?
+            word.tag? && !word.standalone_tag? && !word.iframe_tag? && !word.closed_embed_or_blank_tag?
           end
         else
           non_tags = words.extract_consecutive_words! do |word|

@@ -30,6 +30,10 @@ module HTMLDiff
       @word =~ Regexp.union(/^<span[^>]*class="[^"]*blank[^"]*"[^>]*>$/i, /^<our-embed[^>]*>$/i)
     end
 
+    def closed_embed_or_blank_tag?
+      @word =~ /^<(span[^>]*class="[^"]*blank[^"]*"[^>]*|our-embed[^>]*)><\/(span|our-embed)>$/i
+    end
+
     def tag?
       opening_tag? || closing_tag? || standalone_tag?
     end
