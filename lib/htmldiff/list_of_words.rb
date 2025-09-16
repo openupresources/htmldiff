@@ -13,6 +13,7 @@ module HTMLDiff
         @words = string
       else
         convert_html_to_list_of_words string.chars
+        group_embed_or_blank_tags!
       end
     end
 
@@ -71,6 +72,43 @@ module HTMLDiff
     end
 
     private
+
+    # Group our-embed tags and Writing Blank spans, which are
+    # intentionally left blank, into single words
+    def group_embed_or_blank_tags!
+      return if @words.empty?
+      new_words = []
+      i = 0
+
+      while i < @words.length
+        current_word = @words[i]
+
+        if current_word.embed_or_blank_opening_tag?
+          word_group = [current_word]
+          tag_name = current_word.to_s.match(/^<(span|our-embed)/)[1]
+          i += 1
+
+          # Collect words until the appropriate closing tag is reached
+          while i < @words.length
+            word = @words[i]
+            word_group << word
+
+            if word.to_s.match?(/^<\/#{tag_name}>$/)
+              i += 1
+              break
+            end
+
+            i += 1
+          end
+          # Create a single word from the entire element
+          new_words << Word.new(word_group.map(&:to_s).join)
+        else
+          new_words << current_word
+          i += 1
+        end
+      end
+      @words = new_words
+    end
 
     def convert_html_to_list_of_words(character_array)
       @mode = :char
