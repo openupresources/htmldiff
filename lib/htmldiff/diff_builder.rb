@@ -54,7 +54,6 @@ module HTMLDiff
       # added e.g. <p> becomes <p style="margin: 2px"> due to an editor button
       # press. For this, we just show the new version, otherwise it gets messy
       # trying to find the closing tag.
-      # our-embed tags are the exception and will be replaced in full.
       if operation.same_tag?
         equal(operation)
       else
