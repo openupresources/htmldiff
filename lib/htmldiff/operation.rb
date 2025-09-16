@@ -16,7 +16,11 @@ module HTMLDiff
 
     # Ignores any attributes and tells us if the tag is the same e.g. <p> and
     # <p style="margin: 2px;"> are the same.
+    # The exception to this rule is our-embed tags, where we
+    # always want a full replacement.
     def same_tag?
+      return false if contains_our_embed_tags?
+
       pattern = /<([^>\s]+)[\s>].*/
       first_tagname = pattern.match(old_text) # nil means they are not tags
       first_tagname = first_tagname[1] if first_tagname
@@ -25,6 +29,10 @@ module HTMLDiff
       second_tagname = second_tagname[1] if second_tagname
 
       first_tagname && (first_tagname == second_tagname)
+    end
+
+    def contains_our_embed_tags?
+      old_text.match?(%r{^<\/?our-embed}) && new_text.match?(%r{^<\/?our-embed})
     end
 
     def old_text

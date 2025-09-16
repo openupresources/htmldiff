@@ -24,6 +24,15 @@ describe HTMLDiff::Operation do
       end
     end
 
+    context 'with `our-embed` tags that may have different attributes' do
+      let(:old_tag) { '<our-embed src="gid://123">' }
+      let(:new_tag) { '<our-embed src="gid://456">' }
+
+      it 'returns false for matching and non-matching `our-embed` tags' do
+        expect(operation.same_tag?).to be_false
+      end
+    end
+
     context 'with two different tags' do
       let(:old_tag) { '<p>' }
       let(:new_tag) { '<b>' }
