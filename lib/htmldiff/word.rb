@@ -26,12 +26,8 @@ module HTMLDiff
       (@word[0..7].downcase =~ %r{^<\/?iframe ?})
     end
 
-    def embed_or_blank_opening_tag?
-      @word =~ Regexp.union(/^<span[^>]*class="[^"]*blank[^"]*"[^>]*>$/i, /^<our-embed[^>]*>$/i)
-    end
-
-    def closed_embed_or_blank_tag?
-      @word =~ /^<(span[^>]*class="[^"]*blank[^"]*"[^>]*|our-embed[^>]*)><\/(span|our-embed)>$/i
+    def closed_empty_tag?
+      @word.match?(/^<([^\/\s>]+)(?:\s[^>]*)?>(?:\s*)<\/\1>$/)
     end
 
     def tag?

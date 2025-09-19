@@ -99,9 +99,7 @@ module HTMLDiff
       loop do
         break if words.empty?
 
-        # Handle our-embeds and writing blank spans as single blocks
-        if words.first.closed_embed_or_blank_tag?
-          tag_words = words.extract_consecutive_words! { |word| word.closed_embed_or_blank_tag? }
+        # Handle empty tags as single blocks
           @content << wrap_text_in_diff_tag(tag_words.join, tagname, cssclass)
         elsif words.first.standalone_tag?
           tag_words = words.extract_consecutive_words! { |word| word.standalone_tag? }

@@ -13,7 +13,7 @@ module HTMLDiff
         @words = string
       else
         convert_html_to_list_of_words string.chars
-        group_embed_or_blank_tags!
+        group_empty_tags!
       end
     end
 
@@ -73,9 +73,7 @@ module HTMLDiff
 
     private
 
-    # Group our-embed tags and Writing Blank spans, which are
-    # intentionally left blank, into single words
-    def group_embed_or_blank_tags!
+    def group_empty_tags!
       return if @words.empty?
       new_words = []
       i = 0
@@ -83,31 +81,45 @@ module HTMLDiff
       while i < @words.length
         current_word = @words[i]
 
-        if current_word.embed_or_blank_opening_tag?
-          word_group = [current_word]
-          tag_name = current_word.to_s.match(/^<(span|our-embed)/)[1]
-          i += 1
+        # Check if this is an opening tag
+        if (tag_match = current_word.to_s.match(/^<([^\s>\/]+)[^>]*>$/i))
+          tag_name = tag_match[1]
 
-          # Collect words until the appropriate closing tag is reached
-          while i < @words.length
-            word = @words[i]
-            word_group << word
-
-            if word.to_s.match?(/^<\/#{tag_name}>$/)
-              i += 1
-              break
+          # Look ahead to see if the very next word (after any whitespace) is the closing tag
+          # next_non_whitespace_index = find_next_non_whitespace_word(i + 1)
+          next_index = i + 1
+          # If the very next word is the closing tag, group the empty tag pair
+          if @words[next_index]&.to_s&.match?(/^<\/#{Regexp.escape(tag_name)}>$/i)
+            word_group = []
+            (i..next_index).each do |idx|
+              word_group << @words[idx]
             end
 
+            new_words << Word.new(word_group.map(&:to_s).join)
+            i = next_index + 1
+          else
+            # Otherwise, add as individual word
+            new_words << current_word
             i += 1
           end
-          # Create a single word from the entire element
-          new_words << Word.new(word_group.map(&:to_s).join)
         else
+          # Not an opening tag - keep individual word
           new_words << current_word
           i += 1
         end
       end
+
       @words = new_words
+    end
+
+    def find_next_non_whitespace_word(start_index)
+      i = start_index
+      while i < @words.length
+        word_str = @words[i].to_s.strip
+        return i unless word_str.empty?
+        i += 1
+      end
+      nil
     end
 
     def convert_html_to_list_of_words(character_array)
