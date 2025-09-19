@@ -16,8 +16,13 @@ module HTMLDiff
 
     def default_options
       {
-        block_tag_classes: []
+        block_tag_classes: [],
+        compare_tag_attributes: false
       }
+    end
+
+    def compare_tag_attributes?
+      @options[:compare_tag_attributes]
     end
 
     def build
@@ -54,7 +59,8 @@ module HTMLDiff
       # added e.g. <p> becomes <p style="margin: 2px"> due to an editor button
       # press. For this, we just show the new version, otherwise it gets messy
       # trying to find the closing tag.
-      if operation.same_tag?
+
+      if operation.same_tag?(compare_tag_attributes?)
         equal(operation)
       else
         delete(operation, 'diffmod')
@@ -100,6 +106,8 @@ module HTMLDiff
         break if words.empty?
 
         # Handle empty tags as single blocks
+        if words.first.closed_empty_tag?
+          tag_words = words.extract_consecutive_words! { |word| word.closed_empty_tag? }
           @content << wrap_text_in_diff_tag(tag_words.join, tagname, cssclass)
         elsif words.first.standalone_tag?
           tag_words = words.extract_consecutive_words! { |word| word.standalone_tag? }
@@ -124,7 +132,7 @@ module HTMLDiff
             wrapped = true
           end
           @content += words.extract_consecutive_words! do |word|
-            word.tag? && !word.standalone_tag? && !word.iframe_tag? && !word.closed_embed_or_blank_tag?
+            word.tag? && !word.standalone_tag? && !word.iframe_tag? && !word.closed_empty_tag?
           end
         else
           non_tags = words.extract_consecutive_words! do |word|
