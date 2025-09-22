@@ -13,6 +13,7 @@ module HTMLDiff
         @words = string
       else
         convert_html_to_list_of_words string.chars
+        group_empty_tags!
       end
     end
 
@@ -71,6 +72,55 @@ module HTMLDiff
     end
 
     private
+
+    def group_empty_tags!
+      return if @words.empty?
+      new_words = []
+      i = 0
+
+      while i < @words.length
+        current_word = @words[i]
+
+        # Check if this is an opening tag
+        if (tag_match = current_word.to_s.match(/^<([^\s>\/]+)[^>]*>$/i))
+          tag_name = tag_match[1]
+
+          # Look ahead to see if the very next word (after any whitespace) is the closing tag
+          # next_non_whitespace_index = find_next_non_whitespace_word(i + 1)
+          next_index = i + 1
+          # If the very next word is the closing tag, group the empty tag pair
+          if @words[next_index]&.to_s&.match?(/^<\/#{Regexp.escape(tag_name)}>$/i)
+            word_group = []
+            (i..next_index).each do |idx|
+              word_group << @words[idx]
+            end
+
+            new_words << Word.new(word_group.map(&:to_s).join)
+            i = next_index + 1
+          else
+            # Otherwise, add as individual word
+            new_words << current_word
+            i += 1
+          end
+        else
+          # Not an opening tag - keep individual word
+          new_words << current_word
+          i += 1
+        end
+      end
+
+      @words = new_words
+    end
+
+    def find_next_non_whitespace_word(start_index)
+      i = start_index
+      while i < @words.length
+        word_str = @words[i].to_s.strip
+        return i unless word_str.empty?
+        i += 1
+      end
+      nil
+    end
 
     def convert_html_to_list_of_words(character_array)
       @mode = :char

@@ -26,6 +26,10 @@ module HTMLDiff
       (@word[0..7].downcase =~ %r{^<\/?iframe ?})
     end
 
+    def closed_empty_tag?
+      @word.match?(/^<([^\/\s>]+)(?:\s[^>]*)?>(?:\s*)<\/\1>$/)
+    end
+
     def tag?
       opening_tag? || closing_tag? || standalone_tag?
     end
